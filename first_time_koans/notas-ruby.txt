@@ -1,0 +1,347 @@
+# coding: utf-8
+assert
+assert_equal
+NoMethodError
+asignación en paralelo: ejemplo: si hay 3 y pongo dos, solo coge los dos primeros a no ser que el último vaya precedido por * (
+    first_name, last_name = ["John", "Smith", "III"]
+    first_name, *last_name = ["John", "Smith", "III"]
+)
+    si hay varios elementos en array, pero solo una variable, aunque con coma, entonces solo cogerá el primero.
+
+Strings:
+========
+  def test_the_shovel_operator_modifies_the_original_string
+    original_string = "Hello, "
+    hi = original_string
+    there = "World"
+    hi << there
+    assert_equal "Hello, World", original_string
+
+    # THINK ABOUT IT:
+    #
+    # Ruby programmers tend to favor the shovel operator (<<) over the
+    # plus equals operator (+=) when building up strings.  Why?
+  end
+
+substrings:
+===========
+usando el formato [num,num] es el clásico substring.
+usando rangos [8..9] es del 8 al 2.
+
+symbols:
+========
+  los métodos se almacenan también como símbolos.
+
+regex:
+======
+\A es principio de string (una string puede tener \n...)
+\z es final de string
+^ es principio de línea (puede haber varios en un string)
+$ es final de línea
+
+def test_scan_is_like_find_all
+assert_equal ["one", "two", "three"], "one two-three".scan(/\w+/)
+end
+
+def test_sub_is_like_find_and_replace
+assert_equal "one t-three", "one two-three".sub(/(t\w*)/) { $1[0, 1] }
+end
+
+def test_gsub_is_like_find_and_replace_all
+assert_equal "one t-t", "one two-three".gsub(/(t\w*)/) { $1[0, 1] }
+end
+
+Methods:
+========
+  exact arguments
+  default values
+  *arguments (Array)
+
+Constants:
+==========
+  nested classes inherit constants from enclosing classes.
+  Reference them using the full path. ¿Mandatory?
+  
+  subclasses inherit constants from parent classes.
+  Reference them with relative path.
+
+who wins with both nested and inherited constants
+
+  class MyAnimals
+    LEGS = 2
+
+    class Bird < Animal
+      def legs_in_bird
+        LEGS
+      end
+    end
+  end
+
+  def test_who_wins_with_both_nested_and_inherited_constants
+    assert_equal 2, MyAnimals::Bird.new.legs_in_bird
+  end
+
+  # QUESTION: Which has precedence: The constant in the lexical scope,
+  # or the constant from the inheritance hierarchy?
+
+  # ------------------------------------------------------------------
+
+  class MyAnimals::Oyster < Animal
+    def legs_in_oyster
+      LEGS
+    end
+  end
+
+  def test_who_wins_with_explicit_scoping_on_class_definition
+    assert_equal 4, MyAnimals::Oyster.new.legs_in_oyster
+  end
+
+  # QUESTION: Now which has precedence: The constant in the lexical
+  # scope, or the constant from the inheritance hierarchy?  Why is it
+  # different than the previous answer?
+
+Exceptions:
+===========
+  RuntimeError.ancestors.inspect
+  => "[RuntimeError, StandardError, Exception, Object, Kernel, BasicObject]"
+
+begin
+rescue
+ensure
+raise
+catch
+throw
+
+# Using begin and rescue statements is error handling in Ruby. The same
+# as try/catch in other languages. You can have multiple rescue statements
+# to handle different exceptions.
+def test_rescue_clause
+  result = nil
+  begin
+    fail "Oops"
+  rescue StandardError => ex
+    result = :exception_handled
+  end
+
+  assert_equal :exception_handled, result
+
+  assert_equal true, ex.is_a?(StandardError), "Should be a Standard Error"
+  assert_equal true, ex.is_a?(RuntimeError),  "Should be a Runtime Error"
+
+  assert RuntimeError.ancestors.include?(StandardError),
+         "RuntimeError is a subclass of StandardError"
+
+  assert_equal "Oops", ex.message
+end
+
+def test_raising_a_particular_error
+  result = nil
+  begin
+    # 'raise' and 'fail' are synonyms
+    raise MySpecialError, "My Message"
+  rescue MySpecialError => ex
+    result = :exception_handled
+  end
+
+  assert_equal :exception_handled, result
+  assert_equal "My Message", ex.message
+end
+
+# Using begin, rescue, and finally statements is error handling in Ruby.
+# The same as try/catch/finally in other languages. You can have multiple
+# rescue statements to handle different exceptions. An ensure statement is
+# just like a finally statement. It will always run after all rescue
+# statements have.
+def test_ensure_clause
+  result = nil
+  begin
+    fail "Oops"
+  rescue StandardError => ex
+  # no code here
+  ensure
+    result = :always_run
+  end
+
+  assert_equal :always_run, result
+end
+
+# Sometimes, we must know about the unknown
+def test_asserting_an_error_is_raised
+  # A do-end is a block, a topic to explore more later
+  assert_raise(MySpecialError) do
+    raise MySpecialError.new("New instances can be raised directly.")
+  end
+end
+
+end
+
+
+iterators:
+==========
+each, accepts a block, iterates over each element of an array. can be break.
+collect or map, accept a block, transform elements of an array.
+select or find_all, accept a block, selects certain items of an array.
+find locates the first element matching a criteria.
+
+while, for, until, break, next, redo and retry
+
+break will stop looping after achieving the condition (but does execute the full current one).
+
+
+classes:
+========
+el método .instance_variables devuelve un ARRAY con el nombre de las variables como símbolos.
+se puede acceder a una variable de instancia via .instance_variable_get("@name")
+pero también se puede, de manera más invasiva, mediante:
+.instance_eval("@name")
+.instance_eval { @name }
+
+Pero, la manera mediante la cual se accede a variables de instancia es la siguiente:
+se crean métodos accessor que devuelven su valor de manera tradicional: instancia.name
+
+class Dog3
+  def set_name(a_name)
+    @name = a_name
+  end
+  def name
+    @name
+  end
+end
+
+Pero, la forma correcta, es declarando esa variable, como símbolo, como attr_reader
+  class Dog4
+    attr_reader :name
+
+    def set_name(a_name)
+      @name = a_name
+    end
+  end
+
+Por otro lado, si necesitamos tanto set como get de la variable de instancia, lo haremos mediante el uso de attr_accessor :name
+Esto nos permitirá hacer set de la variable desde fuera, y acceder a ella también:
+class Dog5
+  attr_accessor :name
+end
+
+Y, para crear una instancia con ciertos valores, directamente, tenemos el método initialize, donde asignamos parámetros a variables de instancia:
+class Dog6
+  attr_reader :name
+  def initialize(initial_name)
+    @name = initial_name
+  end
+end
+Así, los argumentos asociados a .new() tienen que coincidir con los de initialize. ( is no, ArgumentError)
+
+self, dentro de un método, hace referencia al objeto que lo contiene, así que devolverá el mismo valor que inspect.
+
+to_s se usa para proveer una versión literal del objeto. Puede ser modificado, como todo, por ejemplo: def to_s
+           @name
+         end
+
+Es útil, a veces, modificarlo, porque cuando se usa el objeto directamente, en interpolación en una string, se irá a buscar el valor de retorno de to_s
+
+Todos los objetos soportan to_s e inspect.
+
+Las clases pueden reabrirse, incluso las builtin, y ser modificadas.
+
+class DiceSet
+  attr_reader :values
+  def roll(t)
+    @values = []
+    1.upto(t) do |i|
+      @values << Random.new.rand(1..6)
+    end
+  end
+end
+
+INHERITANCE:
+============
+subclasses are declared as:
+class CamelCase < Dog
+end
+
+the parent is known by the class as an ancestor.
+CamelCase.ancestors.include?(Dog)
+all the classes have the following as true:
+CamelCase.ancestors.include?(Object)
+Subclasses also inherit behavior and, of course, add new behavior and modify exiting one.
+
+Subclasses can invoke parent behavior via super, like
+class BullDog < Dog
+  def bark
+    super + ", GROWL"
+  end
+end
+IMPORTANT: super doesn't work cross method.
+
+MODULES:
+========
+Los módulos no pueden instanciarse.
+Se incluyen en la clase.
+Los métodos de módulo pueden afectar a las variables de instancia en el objeto.
+Los métodos de clase pueden sobrescribir métudos de módulo.
+
+SCOPE:
+======
+Se pueden referenciar clases anidadas utilizando el scope_operator.
+Jims::Dog.new
+Joes::Dog.new
+
+Si creamos un método, por ejemplo, llamado String, dentro de esa clase siempre haremos referencia al nuevo. Por ese motivo, si queremos referenciar al método global, podemos usar el operador de alcance ::
+  def test_nested_string_is_not_the_same_as_the_system_string
+    assert_equal false, String == "HI".class
+  end
+
+  def test_use_the_prefix_scope_operator_to_force_the_global_scope
+    assert_equal true, ::String == "HI".class
+  end
+
+Las constantes se definen con una letra inicial en mayúsculas.
+
+Los nombres de las clases son también constantes.
+
+Pueden buscarse con los métodos:
+CamelCase.constants
+CamelCase.const_get("PI")
+
+Class Methods:
+==============
+se pueden definir métodos en objetos individuales, sencillamente haciendo, fuera de la clase, en el objeto: def objeto.nuevo_method ... end
+Los otros objetos (instancias de la misma clase) no se verán afectados por el nuevo método singleton.
+
+Como las clases son también objetos, pueden definirse métodos singleton en ellas directamente.
+Serían métodos a nivel de clase, no de instancia.
+Clases e instancias, obviamente, no comparten variables de instancia.
+
+Así como podemos definir métodos de clase desde fuera de la clase, también podemos definirlo desde dentro, sencillamente anteponiendo el CamelCase al nombre del método:
+class Dog
+  def Dog.a_class_method
+  end
+end
+
+Los estamentos de clase devuelven el valor de su última expresión.
+
+Self, en una clase, es un objeto de clase, no una instancia.
+Por ello, para crear métodos de clase, podemos usar self.nuevo_method, en vez del CamelCase.
+
+Una tercera manera de definir métodos de clase es la siguiente:
+  class Dog
+    class << self
+      def another_class_method
+        :still_another_way
+      end
+    end
+  end
+Definiendo una subclase anónima que hereda de self, y dentro de ella, definiendo los métodos de clase diréctamente, sin la necesidad de especificar de donde provienen.
+Siguiendo esa misma lógica, podemos llamar a métodos de clase desde una instancia usando el método class (porque nos subirá un nivel): instancia.class.class_method
+
+MESSAGE PASSING:
+================
+se pueden llamar a los métodos diréctamente, pero también podemos invocarlos de manera dinámica, mediante el método .send
+-por ejemplo-
+instancia.send("nom" + "bre_del_" + num + "method")
+instancia.send(:método)
+
+Disponemos también del método respond_to?(:method_name) para saber si sabrían responder a nuestra pregunta.
+
+
