@@ -15,6 +15,9 @@
 #
 def triangle(a, b, c)
   # WRITE THIS CODE
+  raise TriangleError, "Impossible triangle [#{a}, #{b}, #{c}]" if
+    [a, b, c].max >= (a + b + c) / 2.0
+
   return :equilateral if a == b and b == c
   return :isosceles if a == b or a == c or b == c
   :scalene
