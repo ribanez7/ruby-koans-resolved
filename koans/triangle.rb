@@ -15,6 +15,15 @@
 #
 def triangle(a, b, c)
   # WRITE THIS CODE
+  unique_sizes = [a, b, c].uniq.size
+  case unique_sizes
+  when 1
+    :equilateral
+  when 2
+    :isosceles
+  else
+    :scalene
+  end
 end
 
 # Error class used in part 2.  No need to change this code.
