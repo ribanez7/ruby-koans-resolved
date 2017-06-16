@@ -15,8 +15,17 @@
 #
 def triangle(a, b, c)
   # WRITE THIS CODE
-  unique_sizes = [a, b, c].uniq.size
-  case unique_sizes
+  sizes = [a, b, c].sort
+
+  unless sizes.all?(&:positive?)
+    raise TriangleError, 'No size can be 0 nor negative'
+  end
+
+  unless sizes[0] + sizes[1] > sizes[2]
+    raise TriangleError, '2 smaller sides together must the > 3rd side'
+  end
+
+  case sizes.uniq.size
   when 1
     :equilateral
   when 2
